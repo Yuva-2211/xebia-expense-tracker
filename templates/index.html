@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPENT. — expense tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="tape tape-left" aria-hidden="true"></div>
+<div class="tape tape-right" aria-hidden="true"></div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<header class="masthead">
+  <div class="topbar">
+    <span class="user-chip">👤 {{ username }}</span>
+    <div class="topbar-actions">
+      <button type="button" class="btn-icon" id="themeToggle" title="toggle dark mode">◐</button>
+      <button type="button" class="btn-icon" id="backupBtn" title="download full backup (JSON)">⇩</button>
+      <a class="btn-icon" href="{{ url_for('logout') }}" title="log out">⎋</a>
+    </div>
+  </div>
+  <h1>SPENT<span class="dot">.</span></h1>
+  <p class="subhead">where your money went, no cap</p>
+</header>
+
+<main class="grid">
+
+  <!-- Receipt-style summary -->
+  <section class="receipt" id="summary">
+    <div class="receipt-top">RECEIPT #<span id="receiptNo">0001</span></div>
+    <div class="receipt-row receipt-total">
+      <span>TOTAL SPENT</span>
+      <span id="totalAmount">₹0.00</span>
+    </div>
+    <div class="receipt-row">
+      <span>THIS MONTH</span>
+      <span id="monthAmount">₹0.00</span>
+    </div>
+    <div class="receipt-row small" id="monthChangeRow"></div>
+    <div class="receipt-row small" id="weekChangeRow"></div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-cats" id="categoryBreakdown"></div>
+    <div class="receipt-divider"></div>
+    <div class="callout" id="biggestSpendCallout"></div>
+    <div class="callout" id="topCategoryCallout"></div>
+    <div class="stamp" id="stamp">ON TRACK</div>
+  </section>
+
+  <!-- Add / edit expense form -->
+  <section class="panel" id="addPanel">
+    <h2 id="formTitle">ADD A SPEND</h2>
+    <form id="expenseForm">
+      <input type="hidden" id="editId" value="">
+      <label>
+        WHAT
+        <input type="text" id="title" placeholder="iced matcha, cab, rent..." required>
+      </label>
+
+      <label>
+        HOW MUCH (₹)
+        <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
+      </label>
+
+      <label>
+        CATEGORY
+        <select id="category">
+          {% for c in categories %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        DATE
+        <input type="date" id="date">
+      </label>
+
+      <label>
+        NOTE (optional)
+        <input type="text" id="note" placeholder="tag it, no judgment">
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" id="submitBtn">LOG IT</button>
+        <button type="button" class="btn-cancel" id="cancelEditBtn" style="display:none;">CANCEL</button>
+      </div>
+      <p class="error" id="formError"></p>
+    </form>
+  </section>
+
+  <!-- Trend -->
+  <section class="panel" id="trendPanel">
+    <h2>TREND — LAST 6 MONTHS</h2>
+    <div class="trend-chart" id="trendChart"></div>
+  </section>
+
+  <!-- Budgets -->
+  <section class="panel" id="budgetsPanel">
+    <h2>CATEGORY BUDGETS</h2>
+    <div id="budgetsList"></div>
+    <p class="hint">Set a monthly limit per category. 0 clears it.</p>
+  </section>
+
+  <!-- Recurring -->
+  <section class="panel" id="recurringPanel">
+    <h2>RECURRING SPENDS</h2>
+    <form id="recurringForm" class="recurring-form">
+      <input type="text" id="recTitle" placeholder="rent, netflix..." required>
+      <input type="number" id="recAmount" step="0.01" min="0.01" placeholder="₹" required>
+      <select id="recCategory">
+        {% for c in categories %}
+        <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" id="recDay" min="1" max="28" placeholder="day (1-28)" required>
+      <button type="submit" class="btn-export">+ ADD</button>
+    </form>
+    <ul id="recurringList" class="recurring-list"></ul>
+    <p class="hint" id="recurringEmpty">no recurring spends yet — rent, subscriptions, etc auto-log monthly.</p>
+  </section>
+
+  <!-- List -->
+  <section class="panel" id="listPanel">
+    <div class="list-panel-head">
+      <h2>THE DAMAGE</h2>
+      <button type="button" class="btn-export" id="exportBtn">↓ EXPORT CSV</button>
+    </div>
+
+    <div class="filters">
+      <label class="filter-label">
+        CATEGORY
+        <select id="filterCategory">
+          <option value="All">All</option>
+          {% for c in categories %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-label">
+        FROM
+        <input type="date" id="filterStart">
+      </label>
+      <label class="filter-label">
+        TO
+        <input type="date" id="filterEnd">
+      </label>
+      <button type="button" class="btn-clear" id="clearFiltersBtn">CLEAR</button>
+    </div>
+
+    <div class="list-head">
+      <span>WHAT</span>
+      <span>CAT</span>
+      <span>DATE</span>
+      <span>AMT</span>
+      <span></span>
+    </div>
+    <ul id="expenseList"></ul>
+    <p class="empty" id="emptyState">nothing logged yet. go touch grass, or spend money, your call. (press / to add fast)</p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>Yuva Shankar Narayana</span>
+</footer>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

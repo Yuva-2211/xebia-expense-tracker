@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPENT. — sign up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-ticket-notch"></div>
+    <h1 class="auth-logo">SPENT<span class="dot">.</span></h1>
+    <p class="auth-tagline">NEW ACCOUNT — SIGN UP</p>
+
+    {% if error %}<p class="error auth-error">{{ error }}</p>{% endif %}
+
+    <form method="POST" action="{{ url_for('signup') }}">
+      <label>
+        USERNAME
+        <input type="text" name="username" value="{{ username or '' }}" minlength="3" required autofocus>
+      </label>
+      <label>
+        PASSWORD
+        <input type="password" name="password" minlength="6" required>
+      </label>
+      <label>
+        CONFIRM PASSWORD
+        <input type="password" name="confirm" minlength="6" required>
+      </label>
+      <button type="submit" class="btn-primary">CREATE ACCOUNT</button>
+    </form>
+
+    <p class="auth-switch">Already have one? <a href="{{ url_for('login') }}">Log in</a></p>
+  </div>
+</div>
+</body>
+</html>
