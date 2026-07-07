@@ -1,4 +1,4 @@
-# SPENT. — a brutalist expense tracker
+# SPENT. — a expense tracker
 
 A multi-user expense tracker with a raw, receipt-inspired brutalist UI (paper/ink/mustard/brick/sage palette — no neon), with a dark mode toggle. Built with Flask, Flask-Login, and SQLAlchemy (SQLite locally, Postgres in production).
 
@@ -64,3 +64,5 @@ demo/assignment but won't survive a redeploy.
 - Recurring expenses fire once per month, on or after the day you set (day is clamped 1–28 to avoid short-month issues), the first time the tracker is loaded on/after that day.
 - The JSON "backup" button is a manual export — it is not an automated schedule. Real scheduled backups are best handled at the database level (Render's paid Postgres tiers include automatic backups) rather than in-app.
 - `SECRET_KEY` should be set as a real, private environment variable in production — it signs login session cookies.
+
+
